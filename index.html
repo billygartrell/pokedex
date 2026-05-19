@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#d93636">
+    <meta name="description" content="Track caught Pokemon from the original 150.">
+    <title>Original 150 Pokedex</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Kanto Region</p>
+          <h1>Original 150</h1>
+        </div>
+        <div class="progress-card" aria-live="polite">
+          <span id="caughtCount">0</span>
+          <small>caught</small>
+        </div>
+      </header>
+
+      <section class="controls" aria-label="Pokedex controls">
+        <label class="search-box">
+          <span class="sr-only">Search Pokemon</span>
+          <input id="searchInput" type="search" placeholder="Search by name, number, or type">
+        </label>
+        <div class="filter-row" role="group" aria-label="Filter Pokemon">
+          <button class="filter-button active" type="button" data-filter="all">All</button>
+          <button class="filter-button" type="button" data-filter="caught">Caught</button>
+          <button class="filter-button" type="button" data-filter="missing">Missing</button>
+        </div>
+      </section>
+
+      <main>
+        <div class="status-line">
+          <span id="visibleCount">150 Pokemon</span>
+          <button id="clearCaught" class="text-button" type="button">Reset caught</button>
+        </div>
+        <ul id="pokemonList" class="pokemon-list" aria-label="Original 150 Pokemon"></ul>
+        <p id="emptyState" class="empty-state" hidden>No Pokemon match that view.</p>
+      </main>
+    </div>
+
+    <template id="pokemonCardTemplate">
+      <li class="pokemon-card">
+        <button class="catch-toggle" type="button">
+          <span class="sprite-frame">
+            <img alt="">
+          </span>
+          <span class="pokemon-info">
+            <span class="pokemon-number"></span>
+            <span class="pokemon-name"></span>
+            <span class="type-row"></span>
+          </span>
+          <span class="caught-pill"></span>
+        </button>
+      </li>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "Original 150 Pokedex",
+  "short_name": "Pokedex",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f1e7",
+  "theme_color": "#d93636",
+  "icons": []
+}

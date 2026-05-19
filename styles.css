@@ -1,0 +1,337 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f1e7;
+  --panel: #fffaf0;
+  --ink: #17202a;
+  --muted: #6f6b62;
+  --line: #e5d8c4;
+  --red: #d93636;
+  --red-dark: #9f242d;
+  --blue: #2f7fd1;
+  --green: #2e9564;
+  --shadow: 0 12px 28px rgba(42, 31, 16, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(217, 54, 54, 0.14) 0, rgba(247, 241, 231, 0) 260px),
+    var(--bg);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 20px 14px 36px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 0 18px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--red-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 11vw, 4rem);
+  line-height: 0.92;
+  letter-spacing: 0;
+}
+
+.progress-card {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 86px;
+  height: 86px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background:
+    linear-gradient(var(--red) 0 46%, var(--ink) 46% 54%, #ffffff 54% 100%);
+  box-shadow: var(--shadow);
+}
+
+.progress-card span,
+.progress-card small {
+  display: block;
+  width: 58px;
+  border-radius: 999px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.progress-card span {
+  align-self: end;
+  padding-top: 2px;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.progress-card small {
+  align-self: start;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.controls {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: 0 -14px;
+  padding: 10px 14px 12px;
+  background: rgba(247, 241, 231, 0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(229, 216, 196, 0.72);
+}
+
+.search-box input {
+  width: 100%;
+  height: 48px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 0 15px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 5px 18px rgba(42, 31, 16, 0.09);
+  outline: none;
+}
+
+.search-box input:focus {
+  border-color: var(--blue);
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.filter-button,
+.text-button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.76);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.filter-button.active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.status-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 54px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.text-button {
+  min-height: 34px;
+  padding: 0 10px;
+  color: var(--red-dark);
+}
+
+.text-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.pokemon-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pokemon-card {
+  min-width: 0;
+}
+
+.catch-toggle {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 92px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--panel);
+  color: inherit;
+  text-align: left;
+  box-shadow: 0 7px 20px rgba(42, 31, 16, 0.08);
+}
+
+.catch-toggle[aria-pressed="true"] {
+  border-color: rgba(46, 149, 100, 0.55);
+  background: #f0fff6;
+}
+
+.sprite-frame {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  background: #eef4f8;
+  border: 1px solid rgba(23, 32, 42, 0.08);
+}
+
+.sprite-frame img {
+  width: 68px;
+  height: 68px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+.pokemon-info {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.pokemon-number {
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.pokemon-name {
+  overflow: hidden;
+  font-size: 1.1rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.type-chip {
+  min-width: 0;
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.caught-pill {
+  display: inline-grid;
+  place-items: center;
+  min-width: 68px;
+  height: 34px;
+  border-radius: 999px;
+  background: #f0e4d0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.catch-toggle[aria-pressed="true"] .caught-pill {
+  background: var(--green);
+  color: #ffffff;
+}
+
+.empty-state {
+  margin: 48px 0;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 800;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+[data-type="grass"] { background: #4b9f48; }
+[data-type="poison"] { background: #8f4aa8; }
+[data-type="fire"] { background: #d9552c; }
+[data-type="flying"] { background: #668ccf; }
+[data-type="water"] { background: #2878c8; }
+[data-type="bug"] { background: #8a9b1f; }
+[data-type="normal"] { background: #7f776d; }
+[data-type="electric"] { background: #c99513; }
+[data-type="ground"] { background: #a56d35; }
+[data-type="fairy"] { background: #c45a8d; }
+[data-type="fighting"] { background: #a83c2d; }
+[data-type="psychic"] { background: #c44774; }
+[data-type="rock"] { background: #8a7640; }
+[data-type="steel"] { background: #657987; }
+[data-type="ice"] { background: #27939c; }
+[data-type="ghost"] { background: #5a5487; }
+[data-type="dragon"] { background: #4d62bf; }
+
+@media (min-width: 680px) {
+  .app-shell {
+    padding-inline: 22px;
+  }
+
+  .controls {
+    margin-inline: -22px;
+    padding-inline: 22px;
+  }
+
+  .pokemon-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catch-toggle {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  .caught-pill {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+}
