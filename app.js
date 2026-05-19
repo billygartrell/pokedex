@@ -152,6 +152,11 @@ const POKEMON = [
 ];
 
 const STORAGE_KEY = "original-150-pokedex-caught";
+const CLOUD_PROFILE_ID = "main";
+const SUPABASE_URL = "https://lyyqelmajfzvwffkdfvt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5eXFlbG1hamZ6dndmZmtkZnZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMDEwMzEsImV4cCI6MjA5NDc3NzAzMX0.PWyn0vjX0wzxX8p4dNmL2UObpKhECKz6G6SRq6TtIMc";
+const SUPABASE_TABLE = "pokedex_profiles";
+const CLOUD_REFRESH_INTERVAL = 30000;
 const list = document.querySelector("#pokemonList");
 const template = document.querySelector("#pokemonCardTemplate");
 const caughtCount = document.querySelector("#caughtCount");
@@ -160,9 +165,13 @@ const searchInput = document.querySelector("#searchInput");
 const filterButtons = document.querySelectorAll(".filter-button");
 const clearCaughtButton = document.querySelector("#clearCaught");
 const emptyState = document.querySelector("#emptyState");
+const cloudStatus = document.querySelector("#cloudStatus");
+const syncNowButton = document.querySelector("#syncNow");
 
 let activeFilter = "all";
 let caught = loadCaught();
+let isSyncing = false;
+let pendingCloudSave = false;
 
 function loadCaught() {
   try {
@@ -174,6 +183,105 @@ function loadCaught() {
 
 function saveCaught() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify([...caught].sort((a, b) => a - b)));
+}
+
+function normalizeCaughtIds(ids) {
+  return [...new Set(ids)]
+    .map(Number)
+    .filter((id) => Number.isInteger(id) && id >= 1 && id <= 150)
+    .sort((a, b) => a - b);
+}
+
+function setCloudStatus(message) {
+  cloudStatus.textContent = message;
+}
+
+function setSyncing(syncing) {
+  isSyncing = syncing;
+  syncNowButton.disabled = syncing;
+}
+
+function cloudHeaders(extraHeaders = {}) {
+  return {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    ...extraHeaders
+  };
+}
+
+async function readCloudCaught() {
+  const url = `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?trainer_id=eq.${encodeURIComponent(CLOUD_PROFILE_ID)}&select=caught_ids&limit=1`;
+  const response = await fetch(url, {
+    headers: cloudHeaders({ Accept: "application/json" })
+  });
+
+  if (!response.ok) {
+    throw new Error("Cloud load failed");
+  }
+
+  const rows = await response.json();
+  return normalizeCaughtIds(rows[0]?.caught_ids || []);
+}
+
+async function writeCloudCaught() {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+    method: "POST",
+    headers: cloudHeaders({
+      "Content-Type": "application/json",
+      Prefer: "resolution=merge-duplicates,return=minimal"
+    }),
+    body: JSON.stringify({
+      trainer_id: CLOUD_PROFILE_ID,
+      caught_ids: normalizeCaughtIds(caught),
+      updated_at: new Date().toISOString()
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error("Cloud save failed");
+  }
+}
+
+async function loadFromCloud() {
+  if (isSyncing) return;
+
+  try {
+    setSyncing(true);
+    setCloudStatus("Loading cloud save...");
+    const cloudCaught = await readCloudCaught();
+
+    caught = new Set(cloudCaught);
+    saveCaught();
+    render();
+    setCloudStatus(`Cloud loaded: ${caught.size} caught`);
+  } catch (error) {
+    setCloudStatus(`${error.message}. Using this browser's save.`);
+  } finally {
+    setSyncing(false);
+  }
+}
+
+async function saveToCloud() {
+  if (isSyncing) {
+    pendingCloudSave = true;
+    return;
+  }
+
+  try {
+    setSyncing(true);
+    setCloudStatus("Saving to cloud...");
+    await writeCloudCaught();
+    setCloudStatus(`Cloud saved: ${caught.size} caught`);
+  } catch (error) {
+    setCloudStatus(`${error.message}. Saved on this browser.`);
+  } finally {
+    setSyncing(false);
+
+    if (pendingCloudSave) {
+      pendingCloudSave = false;
+      saveToCloud();
+    }
+  }
 }
 
 function formatNumber(id) {
@@ -263,6 +371,7 @@ list.addEventListener("click", (event) => {
 
   saveCaught();
   render();
+  saveToCloud();
 });
 
 searchInput.addEventListener("input", render);
@@ -279,6 +388,21 @@ clearCaughtButton.addEventListener("click", () => {
   caught = new Set();
   saveCaught();
   render();
+  saveToCloud();
+});
+
+syncNowButton.addEventListener("click", () => {
+  loadFromCloud();
+});
+
+window.addEventListener("focus", () => {
+  loadFromCloud();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    loadFromCloud();
+  }
 });
 
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
@@ -286,3 +410,9 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
 }
 
 render();
+loadFromCloud();
+setInterval(() => {
+  if (document.visibilityState === "visible") {
+    loadFromCloud();
+  }
+}, CLOUD_REFRESH_INTERVAL);
