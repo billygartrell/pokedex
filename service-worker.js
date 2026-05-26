@@ -1,4 +1,4 @@
-const CACHE_NAME = "scarlet-violet-pokedex-v6";
+const CACHE_NAME = "scarlet-violet-pokedex-v16";
 const APP_FILES = [
   "./",
   "./index.html",
@@ -7,6 +7,19 @@ const APP_FILES = [
   "./app.js",
   "./pokemon-data.js",
   "./journal.js",
+  "./img/badges/cortondo.png",
+  "./img/badges/artazon.png",
+  "./img/badges/levincia.png",
+  "./img/badges/cascarrafa.png",
+  "./img/badges/medali.png",
+  "./img/badges/montenevera.png",
+  "./img/badges/alfornada.png",
+  "./img/badges/glaseado.png",
+  "./img/team-star/dark_crew.png",
+  "./img/team-star/fire_crew.png",
+  "./img/team-star/poison_crew.png",
+  "./img/team-star/fairy_crew.png",
+  "./img/team-star/fighting_crew.png",
   "./manifest.webmanifest"
 ];
 

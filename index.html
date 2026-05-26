@@ -18,9 +18,32 @@
         </div>
       </section>
 
+      <nav class="view-tabs" aria-label="Tracker view">
+        <button class="view-tab active" type="button" data-view="pokedex" aria-pressed="true">
+          <svg class="tab-icon" aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M3 12h6"></path>
+            <path d="M15 12h6"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span>Pokedex</span>
+        </button>
+        <button class="view-tab" type="button" data-view="accolades" aria-pressed="false">
+          <svg class="tab-icon" aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M8 4h8v4a4 4 0 0 1-8 0z"></path>
+            <path d="M8 6H5a3 3 0 0 0 3 4"></path>
+            <path d="M16 6h3a3 3 0 0 1-3 4"></path>
+            <path d="M12 12v5"></path>
+            <path d="M8 20h8"></path>
+            <path d="M10 17h4"></path>
+          </svg>
+          <span>Accolades</span>
+        </button>
+      </nav>
+
       <header class="app-header">
         <div>
-          <p class="eyebrow">Paldea Region Pokedex</p>
+          <p id="pageEyebrow" class="eyebrow">Paldea Region Pokedex</p>
           <h1>
             <span class="version-word scarlet-word">Scarlet</span>
             <span class="title-amp">&amp;</span>
@@ -28,15 +51,23 @@
           </h1>
         </div>
         <div class="progress-card" aria-live="polite">
-          <span id="caughtCount">0</span>
-          <small>caught</small>
+          <span class="progress-pokeball" aria-hidden="true">
+            <span class="pokeball-icon progress-pokeball-icon">
+              <span class="pokeball-button-dot"></span>
+            </span>
+          </span>
+          <span id="caughtCount" class="progress-number">0</span>
+          <small id="progressLabel">caught</small>
         </div>
       </header>
 
-      <section class="controls" aria-label="Pokedex controls">
+      <section id="pokedexControls" class="controls view-section" aria-label="Pokedex controls" data-view-section="pokedex">
         <label class="search-box">
           <span class="sr-only">Search Pokemon</span>
-          <input id="searchInput" type="search" placeholder="Search by name, number, or type">
+          <input id="searchInput" type="text" autocomplete="off" placeholder="Search by name, number, or type">
+          <button id="clearSearch" class="clear-search" type="button" aria-label="Clear search" hidden>
+            <span aria-hidden="true">×</span>
+          </button>
         </label>
         <div class="filter-row" role="group" aria-label="Filter Pokemon">
           <button class="filter-button active" type="button" data-filter="all">All</button>
@@ -45,18 +76,33 @@
         </div>
       </section>
 
-      <section class="journey-panel" aria-label="Journey milestones" hidden>
+      <section id="accoladesView" class="journey-panel view-section" aria-label="Journey accolades" data-view-section="accolades" hidden>
+        <section class="controls accolades-controls" aria-label="Accolades controls">
+          <label class="search-box">
+            <span class="sr-only">Search accolades</span>
+            <input id="accoladeSearchInput" type="text" autocomplete="off" placeholder="Search by badge, titan, or crew">
+            <button id="clearAccoladeSearch" class="clear-search" type="button" aria-label="Clear accolade search" hidden>
+              <span aria-hidden="true">×</span>
+            </button>
+          </label>
+          <div class="filter-row" role="group" aria-label="Filter accolades">
+            <button class="accolade-filter-button active" type="button" data-filter="all">All</button>
+            <button class="accolade-filter-button" type="button" data-filter="complete">Done</button>
+            <button class="accolade-filter-button" type="button" data-filter="missing">Missing</button>
+          </div>
+        </section>
         <div class="journey-heading">
           <div>
             <p class="journey-kicker">Journey</p>
-            <h2>Story progress</h2>
+            <h2>Accolades</h2>
           </div>
           <p id="journeyTotal" class="journey-total">0 / 18</p>
         </div>
+        <div id="journeyStats" class="journey-stats" aria-label="Accolade stats"></div>
         <div id="milestoneGroups" class="milestone-groups"></div>
       </section>
 
-      <main>
+      <main id="pokedexView" class="view-section" data-view-section="pokedex">
         <div class="status-line">
           <span id="visibleCount">400 Pokemon</span>
           <details id="resetMenu" class="overflow-menu">

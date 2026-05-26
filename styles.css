@@ -47,6 +47,7 @@ body {
     var(--bg);
   color: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition: background-color 260ms ease;
 }
 
 button,
@@ -78,6 +79,7 @@ button {
   font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
+  transition: color 260ms ease;
 }
 
 h1 {
@@ -89,6 +91,9 @@ h1 {
 
 .version-word {
   color: var(--ink);
+  transition:
+    color 260ms ease,
+    text-shadow 260ms ease;
 }
 
 body[data-trainer="billy"] .violet-word,
@@ -105,20 +110,59 @@ body[data-trainer="friend"] .scarlet-word {
 }
 
 .progress-card {
+  position: relative;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
   width: 86px;
   height: 86px;
-  border: 3px solid var(--ink);
   border-radius: 50%;
-  background:
-    linear-gradient(var(--red) 0 46%, var(--ink) 46% 54%, #ffffff 54% 100%);
   box-shadow: var(--shadow);
 }
 
-.progress-card span,
+.progress-pokeball {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.progress-card .progress-pokeball-icon {
+  width: 86px;
+  height: 86px;
+  border-width: 3px;
+  filter: none;
+  opacity: 1;
+  transform: rotate(0deg);
+  transition:
+    box-shadow 220ms ease,
+    transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.progress-pokeball-icon .pokeball-button-dot {
+  width: 26px;
+  height: 26px;
+  border-width: 3px;
+}
+
+body[data-view="accolades"] .progress-card .progress-pokeball-icon {
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.38),
+    0 8px 20px rgba(159, 106, 19, 0.2);
+  transform: rotate(-18deg);
+}
+
+body[data-view="accolades"] .progress-pokeball-icon .pokeball-button-dot {
+  background: #fff9e6;
+}
+
+body[data-view="accolades"] .progress-pokeball-icon::before {
+  background: #ffd15f;
+}
+
+.progress-card .progress-number,
 .progress-card small {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 58px;
   border-radius: 999px;
@@ -126,7 +170,7 @@ body[data-trainer="friend"] .scarlet-word {
   text-align: center;
 }
 
-.progress-card span {
+.progress-card .progress-number {
   align-self: end;
   padding-top: 2px;
   font-size: 1.45rem;
@@ -151,20 +195,59 @@ body[data-trainer="friend"] .scarlet-word {
   border-bottom: 1px solid rgba(229, 216, 196, 0.72);
 }
 
+.search-box {
+  position: relative;
+  display: block;
+}
+
 .search-box input {
   width: 100%;
   height: 48px;
   border: 2px solid transparent;
   border-radius: 8px;
-  padding: 0 15px;
+  padding: 0 46px 0 15px;
   background: var(--panel);
   color: var(--ink);
   box-shadow: 0 5px 18px rgba(42, 31, 16, 0.09);
   outline: none;
+  transition: border-color 240ms ease;
 }
 
 .search-box input:focus {
   border-color: var(--accent);
+}
+
+.clear-search {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(23, 32, 42, 0.08);
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.clear-search[hidden] {
+  display: none;
+}
+
+.clear-search span {
+  display: block;
+  line-height: 0.9;
+  transform: translateY(-1px);
+}
+
+.clear-search:hover {
+  background: rgba(23, 32, 42, 0.13);
+  color: var(--ink);
 }
 
 .filter-row {
@@ -175,7 +258,9 @@ body[data-trainer="friend"] .scarlet-word {
 }
 
 .filter-button,
+.accolade-filter-button,
 .trainer-button,
+.view-tab,
 .text-button {
   min-height: 38px;
   border: 1px solid var(--line);
@@ -183,9 +268,15 @@ body[data-trainer="friend"] .scarlet-word {
   background: rgba(255, 250, 240, 0.76);
   color: var(--ink);
   font-weight: 800;
+  transition:
+    background-color 240ms ease,
+    border-color 240ms ease,
+    color 240ms ease;
 }
 
-.filter-button.active {
+.filter-button.active,
+.accolade-filter-button.active,
+.view-tab.active {
   border-color: var(--ink);
   background: var(--ink);
   color: #ffffff;
@@ -207,6 +298,69 @@ body[data-trainer="friend"] .scarlet-word {
   color: #ffffff;
 }
 
+.view-tabs {
+  position: relative;
+  display: flex;
+  align-items: end;
+  gap: 4px;
+  margin: 0 0 10px;
+}
+
+.view-tabs::before,
+.view-tabs::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  height: 1px;
+  background: var(--accent);
+  transition: background-color 240ms ease;
+}
+
+.view-tabs::before {
+  left: 0;
+  width: var(--active-tab-left, 0);
+}
+
+.view-tabs::after {
+  right: 0;
+  left: calc(var(--active-tab-left, 0px) + var(--active-tab-width, 0px));
+}
+
+.view-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  position: relative;
+  z-index: 1;
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.tab-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.25;
+}
+
+.view-tab.active {
+  border-color: var(--accent);
+  border-bottom: 0;
+  background: transparent;
+  color: var(--accent-dark);
+}
+
 .status-line {
   display: flex;
   align-items: center;
@@ -219,16 +373,15 @@ body[data-trainer="friend"] .scarlet-word {
 }
 
 .journey-panel {
-  margin: 14px 0 4px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px;
-  background: rgba(255, 250, 240, 0.82);
-  box-shadow: 0 7px 20px rgba(42, 31, 16, 0.06);
+  margin: 0;
 }
 
-.journey-heading,
-.milestone-summary {
+.accolades-controls {
+  position: static;
+  margin: 0 -14px 12px;
+}
+
+.journey-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -241,6 +394,7 @@ body[data-trainer="friend"] .scarlet-word {
   font-size: 0.72rem;
   font-weight: 900;
   text-transform: uppercase;
+  transition: color 240ms ease;
 }
 
 .journey-heading h2 {
@@ -258,79 +412,204 @@ body[data-trainer="friend"] .scarlet-word {
   color: var(--accent-dark);
   font-size: 0.78rem;
   font-weight: 900;
+  transition:
+    background-color 240ms ease,
+    color 240ms ease;
 }
 
 .journey-total {
   padding: 6px 10px;
 }
 
+.journey-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.journey-stat-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 8px;
+  background: var(--panel);
+  box-shadow: 0 7px 20px rgba(42, 31, 16, 0.06);
+}
+
+.journey-stat-value,
+.journey-stat-label {
+  display: block;
+  text-align: center;
+}
+
+.journey-stat-value {
+  color: var(--accent-dark);
+  font-size: 0.95rem;
+  font-weight: 900;
+  transition: color 240ms ease;
+}
+
+.journey-stat-label {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
 .milestone-groups {
   display: grid;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
+  margin: 0;
 }
 
-.milestone-group {
-  border: 1px solid rgba(229, 216, 196, 0.92);
+.milestone-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 72px;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.42);
-  overflow: hidden;
+  padding: 10px;
+  background: var(--panel);
+  color: inherit;
+  text-align: left;
+  box-shadow: 0 7px 20px rgba(42, 31, 16, 0.08);
+  transition:
+    background-color 240ms ease,
+    border-color 240ms ease;
 }
 
-.milestone-summary {
-  min-height: 48px;
-  padding: 8px 10px;
-  cursor: pointer;
-  list-style: none;
+.milestone-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(23, 32, 42, 0.08);
+  border-radius: 8px;
+  background: #eef4f8;
 }
 
-.milestone-summary::-webkit-details-marker {
-  display: none;
+.milestone-visual img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+  object-fit: contain;
 }
 
-.milestone-title,
-.milestone-subtitle {
+.sprite-milestone-visual {
+  background: #eef4f8;
+}
+
+.badge-milestone-visual {
+  background: rgba(255, 250, 240, 0.72);
+}
+
+.milestone-visual::before,
+.milestone-visual::after {
+  content: "";
   display: block;
+}
+
+.gym_badges-visual::before {
+  width: 28px;
+  height: 34px;
+  border: 3px solid #c99513;
+  border-radius: 50% 50% 46% 46%;
+  background:
+    radial-gradient(circle at 50% 38%, #ffffff 0 18%, transparent 19%),
+    linear-gradient(135deg, #ffd770, #b97918);
+  box-shadow: 0 3px 0 rgba(23, 32, 42, 0.1);
+}
+
+.titans-visual::before {
+  width: 34px;
+  height: 30px;
+  border-radius: 42% 58% 48% 52%;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.32), transparent 42%),
+    #8a7640;
+  box-shadow:
+    inset -5px -6px 0 rgba(23, 32, 42, 0.16),
+    0 3px 0 rgba(23, 32, 42, 0.1);
+  transform: rotate(-10deg);
+}
+
+.team_star-visual::before {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, #ffeb7a, #d93636);
+  clip-path: polygon(50% 0, 62% 34%, 98% 34%, 68% 55%, 80% 92%, 50% 70%, 20% 92%, 32% 55%, 2% 34%, 38% 34%);
+  filter: drop-shadow(0 3px 0 rgba(23, 32, 42, 0.12));
+}
+
+.milestone-card[aria-pressed="true"] {
+  border-color: var(--caught-border);
+  background: var(--caught-bg);
+}
+
+.milestone-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
 }
 
 .milestone-title {
   color: var(--ink);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 900;
 }
 
 .milestone-subtitle {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 800;
 }
 
-.milestone-count {
-  padding: 5px 9px;
+.milestone-complete-dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(23, 32, 42, 0.1);
+  border-radius: 50%;
+  background: #ffffff;
+  transition: border-color 240ms ease;
 }
 
-.milestone-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  padding: 0 10px 10px;
+.milestone-complete-dot::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+  opacity: 0.46;
+  transition:
+    background-color 240ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    opacity 240ms ease;
 }
 
-.milestone-button {
-  min-height: 34px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0 10px;
-  background: rgba(255, 250, 240, 0.85);
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 900;
+.milestone-card[aria-pressed="true"] .milestone-complete-dot {
+  border-color: var(--accent);
 }
 
-.milestone-button[aria-pressed="true"] {
-  border-color: transparent;
+.milestone-card[aria-pressed="true"] .milestone-complete-dot::before {
+  width: 22px;
+  height: 22px;
+  border-color: var(--accent);
   background: var(--accent);
-  color: #ffffff;
+  box-shadow: inset 0 0 0 5px #ffffff;
+  opacity: 1;
+}
+
+.accolade-empty-state {
+  margin: 26px 0;
 }
 
 .text-button {
@@ -546,6 +825,9 @@ body[data-trainer="friend"] .scarlet-word {
   color: inherit;
   text-align: left;
   box-shadow: 0 7px 20px rgba(42, 31, 16, 0.08);
+  transition:
+    background-color 240ms ease,
+    border-color 240ms ease;
 }
 
 .pokemon-card-inner:has(.catch-toggle[aria-pressed="true"]) {
@@ -589,6 +871,7 @@ body[data-trainer="friend"] .scarlet-word {
   color: var(--accent);
   font-size: 0.78rem;
   font-weight: 900;
+  transition: color 240ms ease;
 }
 
 .pokemon-name {
@@ -634,22 +917,49 @@ body[data-trainer="friend"] .scarlet-word {
   overflow: hidden;
   border: 2px solid var(--ink);
   border-radius: 50%;
-  background:
-    linear-gradient(var(--accent) 0 45%, var(--ink) 45% 55%, #ffffff 55% 100%);
+  background: #ffffff;
   filter: grayscale(1);
   opacity: 0.54;
+  transition:
+    filter 240ms ease,
+    opacity 240ms ease,
+    transform 240ms ease;
+}
+
+.pokeball-icon::before,
+.pokeball-icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  transition: background-color 260ms ease;
+}
+
+.pokeball-icon::before {
+  top: 0;
+  height: 45%;
+  background: var(--accent);
+}
+
+.pokeball-icon::after {
+  top: 45%;
+  z-index: 1;
+  height: 10%;
+  background: var(--ink);
 }
 
 .pokeball-button-dot {
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 2;
   width: 9px;
   height: 9px;
   border: 2px solid var(--ink);
   border-radius: 50%;
   background: #ffffff;
   transform: translate(-50%, -50%);
+  transition: background-color 240ms ease;
 }
 
 .catch-toggle[aria-pressed="true"] .pokeball-icon {
@@ -686,14 +996,6 @@ body[data-trainer="friend"] .scarlet-word {
 
 .john-dot {
   right: 4px;
-}
-
-.ownership-dots.both-caught .billy-dot {
-  left: 8px;
-}
-
-.ownership-dots.both-caught .john-dot {
-  right: 8px;
 }
 
 .billy-dot.caught {

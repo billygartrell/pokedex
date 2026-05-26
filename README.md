@@ -10,14 +10,14 @@ A mobile-first static Pokedex for tracking caught Pokemon from the Scarlet and V
 - Search by name, number, or type
 - All, caught, and missing filters
 - Trainer-colored card states with small Billy / John ownership markers
-- Per-trainer Scarlet and Violet story milestone tracking
+- Per-trainer Accolades view for Scarlet and Violet story milestone tracking
 - Local browser persistence with `localStorage`
 - Supabase cloud sync for each trainer profile
 - Netlify-ready static files
 
 ## Cloud Sync
 
-The app syncs trainer profiles named `billy` and `friend` to Supabase. The `friend` profile is shown as John in the app. Run `supabase-schema.sql` in your Supabase SQL editor before deploying. The schema includes both the caught-list profile table and the catching journal table. If you ran an older version of the schema, run it again so Paldea Pokemon IDs are accepted by the journal.
+The app syncs trainer profiles named `billy` and `friend` to Supabase. The `friend` profile is shown as John in the app. Run `supabase-schema.sql` in your Supabase SQL editor before deploying. The schema includes the caught-list profile table, a separate accolades table, and the catching journal table. If you ran an older version of the schema, run it again so Paldea Pokemon IDs and accolade milestones are accepted.
 
 ## Local Preview
 

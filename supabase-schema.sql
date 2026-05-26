@@ -8,6 +8,34 @@ create table if not exists public.pokedex_profiles (
 alter table public.pokedex_profiles
   add column if not exists milestones jsonb not null default '{}';
 
+create table if not exists public.pokedex_accolades (
+  trainer_id text primary key,
+  milestones jsonb not null default '{}',
+  updated_at timestamp with time zone not null default now()
+);
+
+alter table public.pokedex_accolades enable row level security;
+
+drop policy if exists "Public read pokedex accolades" on public.pokedex_accolades;
+drop policy if exists "Public insert pokedex accolades" on public.pokedex_accolades;
+drop policy if exists "Public update pokedex accolades" on public.pokedex_accolades;
+
+create policy "Public read pokedex accolades"
+  on public.pokedex_accolades
+  for select
+  using (true);
+
+create policy "Public insert pokedex accolades"
+  on public.pokedex_accolades
+  for insert
+  with check (true);
+
+create policy "Public update pokedex accolades"
+  on public.pokedex_accolades
+  for update
+  using (true)
+  with check (true);
+
 alter table public.pokedex_profiles enable row level security;
 
 drop policy if exists "Public read pokedex profiles" on public.pokedex_profiles;
