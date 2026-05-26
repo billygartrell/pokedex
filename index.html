@@ -4,17 +4,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#d93636">
-    <meta name="description" content="Track caught Pokemon from the original 150.">
-    <title>Original 150 Pokedex</title>
+    <meta name="description" content="Track caught Pokemon from Pokemon Scarlet and Violet.">
+    <title>Scarlet & Violet Pokedex</title>
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <div class="app-shell">
+      <section class="trainer-panel" aria-label="Trainer profile">
+        <div class="trainer-row" role="group" aria-label="Choose trainer">
+          <button class="trainer-button active" type="button" data-trainer="billy" aria-pressed="true">Billy</button>
+          <button class="trainer-button" type="button" data-trainer="friend" aria-pressed="false">John</button>
+        </div>
+      </section>
+
       <header class="app-header">
         <div>
-          <p class="eyebrow">Kanto Region</p>
-          <h1>Original 150</h1>
+          <p class="eyebrow">Paldea Region</p>
+          <h1>Scarlet & Violet</h1>
         </div>
         <div class="progress-card" aria-live="polite">
           <span id="caughtCount">0</span>
@@ -34,40 +41,44 @@
         </div>
       </section>
 
-      <section class="cloud-panel" aria-label="Cloud sync">
-        <div>
-          <p class="cloud-label">Cloud sync</p>
-          <p id="cloudStatus" class="cloud-status" aria-live="polite">Loading local save</p>
-        </div>
-        <button id="syncNow" class="cloud-button" type="button">Retry</button>
-      </section>
-
       <main>
         <div class="status-line">
-          <span id="visibleCount">150 Pokemon</span>
+          <span id="visibleCount">400 Pokemon</span>
           <button id="clearCaught" class="text-button" type="button">Reset caught</button>
         </div>
-        <ul id="pokemonList" class="pokemon-list" aria-label="Original 150 Pokemon"></ul>
+        <ul id="pokemonList" class="pokemon-list" aria-label="Paldea Pokemon"></ul>
         <p id="emptyState" class="empty-state" hidden>No Pokemon match that view.</p>
       </main>
     </div>
 
     <template id="pokemonCardTemplate">
       <li class="pokemon-card">
-        <button class="catch-toggle" type="button">
+        <div class="pokemon-card-inner">
           <span class="sprite-frame">
             <img alt="">
+            <span class="ownership-dots" role="img">
+              <span class="ownership-dot billy-dot"></span>
+              <span class="ownership-dot john-dot"></span>
+            </span>
           </span>
           <span class="pokemon-info">
-            <span class="pokemon-number"></span>
+            <span class="pokemon-meta">
+              <span class="pokemon-number"></span>
+            </span>
             <span class="pokemon-name"></span>
             <span class="type-row"></span>
           </span>
-          <span class="caught-pill"></span>
-        </button>
+          <button class="catch-toggle" type="button">
+            <span class="sr-only caught-label"></span>
+            <span class="pokeball-icon" aria-hidden="true">
+              <span class="pokeball-button-dot"></span>
+            </span>
+          </button>
+        </div>
       </li>
     </template>
 
+    <script src="pokemon-data.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

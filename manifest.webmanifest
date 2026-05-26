@@ -1,6 +1,6 @@
 {
-  "name": "Original 150 Pokedex",
-  "short_name": "Pokedex",
+  "name": "Scarlet & Violet Pokedex",
+  "short_name": "Paldea Dex",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f7f1e7",

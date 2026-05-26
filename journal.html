@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#d93636">
+    <meta name="description" content="A catching journal for your Scarlet and Violet Pokemon journey.">
+    <title>Catching Journal</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Paldea Region</p>
+          <h1>Journal</h1>
+        </div>
+        <div class="progress-card" aria-live="polite">
+          <span id="journalCount">0</span>
+          <small>entries</small>
+        </div>
+      </header>
+
+      <nav class="app-nav" aria-label="Primary">
+        <a class="nav-link" href="index.html">Pokedex</a>
+        <a class="nav-link active" href="journal.html">Journal</a>
+      </nav>
+
+      <section class="trainer-panel" aria-label="Trainer profile">
+        <p class="trainer-label">Journal for</p>
+        <div class="trainer-row" role="group" aria-label="Choose trainer">
+          <button class="trainer-button active" type="button" data-trainer="billy" aria-pressed="true">Billy</button>
+          <button class="trainer-button" type="button" data-trainer="friend" aria-pressed="false">John</button>
+        </div>
+        <p class="trainer-note">Each trainer keeps a separate journey log.</p>
+      </section>
+
+      <section class="cloud-panel" aria-label="Journal sync">
+        <div>
+          <p class="cloud-label">Journey log</p>
+          <p id="journalStatus" class="cloud-status" aria-live="polite">Loading journal</p>
+        </div>
+        <button id="refreshJournal" class="cloud-button" type="button">Refresh</button>
+      </section>
+
+      <main>
+        <section class="journal-stats" aria-label="Journey stats">
+          <div class="stat-card">
+            <span id="journeyDays" class="stat-value">0</span>
+            <span class="stat-label">journey days</span>
+          </div>
+          <div class="stat-card">
+            <span id="caughtEntries" class="stat-value">0</span>
+            <span class="stat-label">caught entries</span>
+          </div>
+        </section>
+
+        <ul id="timelineList" class="timeline-list" aria-label="Catching timeline"></ul>
+        <p id="emptyJournal" class="empty-state" hidden>No catches recorded yet.</p>
+      </main>
+    </div>
+
+    <script src="pokemon-data.js"></script>
+    <script src="journal.js"></script>
+  </body>
+</html>

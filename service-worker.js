@@ -1,9 +1,12 @@
-const CACHE_NAME = "original-150-pokedex-v4";
+const CACHE_NAME = "scarlet-violet-pokedex-v3";
 const APP_FILES = [
   "./",
   "./index.html",
+  "./journal.html",
   "./styles.css",
   "./app.js",
+  "./pokemon-data.js",
+  "./journal.js",
   "./manifest.webmanifest"
 ];
 
