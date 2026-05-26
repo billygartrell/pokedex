@@ -10,28 +10,85 @@ const SUPABASE_TABLE = "pokedex_profiles";
 const SUPABASE_JOURNAL_TABLE = "pokedex_journal";
 const CLOUD_REFRESH_INTERVAL = 30000;
 
+const MILESTONE_GROUPS = [
+  {
+    id: "gym_badges",
+    title: "Gym Badges",
+    shortTitle: "Badges",
+    items: [
+      { id: "cortondo", label: "Cortondo" },
+      { id: "artazon", label: "Artazon" },
+      { id: "levincia", label: "Levincia" },
+      { id: "cascarrafa", label: "Cascarrafa" },
+      { id: "medali", label: "Medali" },
+      { id: "montenevera", label: "Montenevera" },
+      { id: "alfornada", label: "Alfornada" },
+      { id: "glaseado", label: "Glaseado" }
+    ]
+  },
+  {
+    id: "titans",
+    title: "Titans",
+    shortTitle: "Titans",
+    items: [
+      { id: "stony_cliff", label: "Stony Cliff" },
+      { id: "open_sky", label: "Open Sky" },
+      { id: "lurking_steel", label: "Lurking Steel" },
+      { id: "quaking_earth", label: "Quaking Earth" },
+      { id: "false_dragon", label: "False Dragon" }
+    ]
+  },
+  {
+    id: "team_star",
+    title: "Team Star",
+    shortTitle: "Starfall",
+    items: [
+      { id: "dark_crew", label: "Dark Crew" },
+      { id: "fire_crew", label: "Fire Crew" },
+      { id: "poison_crew", label: "Poison Crew" },
+      { id: "fairy_crew", label: "Fairy Crew" },
+      { id: "fighting_crew", label: "Fighting Crew" }
+    ]
+  }
+];
+
 const list = document.querySelector("#pokemonList");
 const template = document.querySelector("#pokemonCardTemplate");
 const caughtCount = document.querySelector("#caughtCount");
 const visibleCount = document.querySelector("#visibleCount");
+const journeyTotal = document.querySelector("#journeyTotal");
+const milestoneGroups = document.querySelector("#milestoneGroups");
 const searchInput = document.querySelector("#searchInput");
 const filterButtons = document.querySelectorAll(".filter-button");
 const trainerButtons = document.querySelectorAll(".trainer-button");
+const resetMenu = document.querySelector("#resetMenu");
 const clearCaughtButton = document.querySelector("#clearCaught");
+const resetDialog = document.querySelector("#resetDialog");
+const resetTrainerName = document.querySelector("#resetTrainerName");
+const cancelResetButton = document.querySelector("#cancelReset");
+const confirmResetButton = document.querySelector("#confirmReset");
 const emptyState = document.querySelector("#emptyState");
 const cloudStatus = document.querySelector("#cloudStatus");
 const syncNowButton = document.querySelector("#syncNow");
 
 const validPokemonIds = new Set(POKEMON.map((pokemon) => pokemon.id));
+const validMilestones = Object.fromEntries(
+  MILESTONE_GROUPS.map((group) => [group.id, new Set(group.items.map((item) => item.id))])
+);
 
 let activeFilter = "all";
 let activeTrainerId = loadActiveTrainerId();
 let caughtByTrainer = loadAllCaught();
+let milestonesByTrainer = loadAllMilestones();
 let isSyncing = false;
 let pendingCloudSave = false;
 
 function caughtStorageKey(trainerId) {
   return `sv-pokedex-caught-${trainerId}`;
+}
+
+function milestonesStorageKey(trainerId) {
+  return `sv-pokedex-milestones-${trainerId}`;
 }
 
 function loadActiveTrainerId() {
@@ -74,12 +131,48 @@ function saveCaught(trainerId) {
   } catch {}
 }
 
+function normalizeMilestones(value) {
+  const normalized = Object.fromEntries(MILESTONE_GROUPS.map((group) => [group.id, []]));
+  if (!value || typeof value !== "object") return normalized;
+
+  for (const group of MILESTONE_GROUPS) {
+    const ids = Array.isArray(value[group.id]) ? value[group.id] : [];
+    normalized[group.id] = [...new Set(ids)]
+      .filter((id) => validMilestones[group.id].has(id))
+      .sort();
+  }
+
+  return normalized;
+}
+
+function loadMilestones(trainerId) {
+  try {
+    return normalizeMilestones(JSON.parse(localStorage.getItem(milestonesStorageKey(trainerId))));
+  } catch {
+    return normalizeMilestones();
+  }
+}
+
+function loadAllMilestones() {
+  return Object.fromEntries(TRAINERS.map((trainer) => [trainer.id, loadMilestones(trainer.id)]));
+}
+
+function saveMilestones(trainerId) {
+  try {
+    localStorage.setItem(milestonesStorageKey(trainerId), JSON.stringify(normalizeMilestones(milestonesByTrainer[trainerId])));
+  } catch {}
+}
+
 function activeTrainer() {
   return TRAINERS.find((trainer) => trainer.id === activeTrainerId) || TRAINERS[0];
 }
 
 function activeCaught() {
   return caughtByTrainer[activeTrainerId] || new Set();
+}
+
+function activeMilestones() {
+  return normalizeMilestones(milestonesByTrainer[activeTrainerId]);
 }
 
 function setCloudStatus(message) {
@@ -104,34 +197,58 @@ function cloudHeaders(extraHeaders = {}) {
 
 async function readCloudProfiles() {
   const trainerIds = TRAINERS.map((trainer) => trainer.id).join(",");
-  const url = `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?trainer_id=in.(${trainerIds})&select=trainer_id,caught_ids`;
+  const url = `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?trainer_id=in.(${trainerIds})&select=trainer_id,caught_ids,milestones`;
   const response = await fetch(url, {
     headers: cloudHeaders({ Accept: "application/json" })
   });
 
   if (!response.ok) {
-    throw new Error("Cloud load failed");
+    const fallbackUrl = `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?trainer_id=in.(${trainerIds})&select=trainer_id,caught_ids`;
+    const fallbackResponse = await fetch(fallbackUrl, {
+      headers: cloudHeaders({ Accept: "application/json" })
+    });
+
+    if (!fallbackResponse.ok) {
+      throw new Error("Cloud load failed");
+    }
+
+    return fallbackResponse.json();
   }
 
   return response.json();
 }
 
 async function writeCloudCaught(trainerId) {
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+  const profile = {
+    trainer_id: trainerId,
+    caught_ids: normalizeCaughtIds(caughtByTrainer[trainerId]),
+    milestones: normalizeMilestones(milestonesByTrainer[trainerId]),
+    updated_at: new Date().toISOString()
+  };
+
+  let response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
     method: "POST",
     headers: cloudHeaders({
       "Content-Type": "application/json",
       Prefer: "resolution=merge-duplicates,return=minimal"
     }),
-    body: JSON.stringify({
-      trainer_id: trainerId,
-      caught_ids: normalizeCaughtIds(caughtByTrainer[trainerId]),
-      updated_at: new Date().toISOString()
-    })
+    body: JSON.stringify(profile)
   });
 
   if (!response.ok) {
-    throw new Error("Cloud save failed");
+    const { milestones, ...caughtOnlyProfile } = profile;
+    response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+      method: "POST",
+      headers: cloudHeaders({
+        "Content-Type": "application/json",
+        Prefer: "resolution=merge-duplicates,return=minimal"
+      }),
+      body: JSON.stringify(caughtOnlyProfile)
+    });
+
+    if (!response.ok) {
+      throw new Error("Cloud save failed");
+    }
   }
 }
 
@@ -179,7 +296,9 @@ async function loadFromCloud() {
     for (const row of rows) {
       if (caughtByTrainer[row.trainer_id]) {
         caughtByTrainer[row.trainer_id] = new Set(normalizeCaughtIds(row.caught_ids || []));
+        milestonesByTrainer[row.trainer_id] = normalizeMilestones(row.milestones);
         saveCaught(row.trainer_id);
+        saveMilestones(row.trainer_id);
       }
     }
 
@@ -260,6 +379,90 @@ function renderTrainerControls() {
   });
 }
 
+function openResetDialog() {
+  if (activeCaught().size === 0) return;
+
+  resetTrainerName.textContent = activeTrainer().name;
+  resetMenu.removeAttribute("open");
+
+  if (typeof resetDialog.showModal === "function") {
+    resetDialog.showModal();
+  } else if (window.confirm(`Reset ${activeTrainer().name}'s Pokedex?`)) {
+    resetActiveTrainerCaught();
+  }
+}
+
+function closeResetDialog() {
+  if (resetDialog.open) {
+    resetDialog.close();
+  }
+}
+
+function resetActiveTrainerCaught() {
+  caughtByTrainer[activeTrainerId] = new Set();
+  saveCaught(activeTrainerId);
+  render();
+  saveToCloud(activeTrainerId);
+  clearJournal(activeTrainerId).catch(() => {});
+  closeResetDialog();
+}
+
+function milestoneCount(group, milestones = activeMilestones()) {
+  return milestones[group.id]?.length || 0;
+}
+
+function renderMilestones() {
+  if (!journeyTotal || !milestoneGroups || milestoneGroups.closest("[hidden]")) return;
+
+  const milestones = activeMilestones();
+  const totalComplete = MILESTONE_GROUPS.reduce((sum, group) => sum + milestoneCount(group, milestones), 0);
+  const totalPossible = MILESTONE_GROUPS.reduce((sum, group) => sum + group.items.length, 0);
+  const openGroups = new Set(
+    [...milestoneGroups.querySelectorAll(".milestone-group[open]")]
+      .map((group) => group.dataset.group)
+  );
+
+  journeyTotal.textContent = `${totalComplete} / ${totalPossible}`;
+  milestoneGroups.replaceChildren();
+
+  for (const group of MILESTONE_GROUPS) {
+    const completeCount = milestoneCount(group, milestones);
+    const details = document.createElement("details");
+    details.className = "milestone-group";
+    details.dataset.group = group.id;
+    details.open = openGroups.has(group.id);
+
+    const summary = document.createElement("summary");
+    summary.className = "milestone-summary";
+    summary.innerHTML = `
+      <span>
+        <span class="milestone-title">${group.title}</span>
+        <span class="milestone-subtitle">${group.shortTitle}</span>
+      </span>
+      <span class="milestone-count">${completeCount} / ${group.items.length}</span>
+    `;
+    details.append(summary);
+
+    const itemList = document.createElement("div");
+    itemList.className = "milestone-list";
+
+    for (const item of group.items) {
+      const isComplete = milestones[group.id].includes(item.id);
+      const button = document.createElement("button");
+      button.className = "milestone-button";
+      button.type = "button";
+      button.dataset.group = group.id;
+      button.dataset.milestone = item.id;
+      button.setAttribute("aria-pressed", String(isComplete));
+      button.textContent = item.label;
+      itemList.append(button);
+    }
+
+    details.append(itemList);
+    milestoneGroups.append(details);
+  }
+}
+
 function render() {
   const pokemonToShow = filteredPokemon();
   const caught = activeCaught();
@@ -312,6 +515,7 @@ function render() {
   emptyState.hidden = pokemonToShow.length > 0;
   clearCaughtButton.disabled = caught.size === 0;
   renderTrainerControls();
+  renderMilestones();
 }
 
 list.addEventListener("click", (event) => {
@@ -359,12 +563,43 @@ trainerButtons.forEach((button) => {
   });
 });
 
-clearCaughtButton.addEventListener("click", () => {
-  caughtByTrainer[activeTrainerId] = new Set();
-  saveCaught(activeTrainerId);
+milestoneGroups.addEventListener("click", (event) => {
+  const button = event.target.closest(".milestone-button");
+  if (!button) return;
+
+  const milestones = activeMilestones();
+  const groupId = button.dataset.group;
+  const milestoneId = button.dataset.milestone;
+  const groupMilestones = new Set(milestones[groupId] || []);
+
+  if (groupMilestones.has(milestoneId)) {
+    groupMilestones.delete(milestoneId);
+  } else {
+    groupMilestones.add(milestoneId);
+  }
+
+  milestones[groupId] = [...groupMilestones].sort();
+  milestonesByTrainer[activeTrainerId] = normalizeMilestones(milestones);
+  saveMilestones(activeTrainerId);
   render();
   saveToCloud(activeTrainerId);
-  clearJournal(activeTrainerId).catch(() => {});
+});
+
+clearCaughtButton.addEventListener("click", openResetDialog);
+
+cancelResetButton.addEventListener("click", closeResetDialog);
+
+confirmResetButton.addEventListener("click", resetActiveTrainerCaught);
+
+resetDialog.addEventListener("click", (event) => {
+  if (event.target === resetDialog) {
+    closeResetDialog();
+  }
+});
+
+document.addEventListener("click", (event) => {
+  if (!resetMenu.open || resetMenu.contains(event.target)) return;
+  resetMenu.removeAttribute("open");
 });
 
 syncNowButton?.addEventListener("click", () => {

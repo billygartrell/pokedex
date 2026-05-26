@@ -10,6 +10,7 @@ A mobile-first static Pokedex for tracking caught Pokemon from the Scarlet and V
 - Search by name, number, or type
 - All, caught, and missing filters
 - Trainer-colored card states with small Billy / John ownership markers
+- Per-trainer Scarlet and Violet story milestone tracking
 - Local browser persistence with `localStorage`
 - Supabase cloud sync for each trainer profile
 - Netlify-ready static files

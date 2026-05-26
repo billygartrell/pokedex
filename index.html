@@ -20,8 +20,12 @@
 
       <header class="app-header">
         <div>
-          <p class="eyebrow">Paldea Region</p>
-          <h1>Scarlet & Violet</h1>
+          <p class="eyebrow">Paldea Region Pokedex</p>
+          <h1>
+            <span class="version-word scarlet-word">Scarlet</span>
+            <span class="title-amp">&amp;</span>
+            <span class="version-word violet-word">Violet</span>
+          </h1>
         </div>
         <div class="progress-card" aria-live="polite">
           <span id="caughtCount">0</span>
@@ -41,15 +45,44 @@
         </div>
       </section>
 
+      <section class="journey-panel" aria-label="Journey milestones" hidden>
+        <div class="journey-heading">
+          <div>
+            <p class="journey-kicker">Journey</p>
+            <h2>Story progress</h2>
+          </div>
+          <p id="journeyTotal" class="journey-total">0 / 18</p>
+        </div>
+        <div id="milestoneGroups" class="milestone-groups"></div>
+      </section>
+
       <main>
         <div class="status-line">
           <span id="visibleCount">400 Pokemon</span>
-          <button id="clearCaught" class="text-button" type="button">Reset caught</button>
+          <details id="resetMenu" class="overflow-menu">
+            <summary class="overflow-trigger" aria-label="More actions">
+              <span aria-hidden="true">•••</span>
+            </summary>
+            <div class="overflow-panel">
+              <button id="clearCaught" class="menu-action danger-action" type="button">Reset Pokedex</button>
+            </div>
+          </details>
         </div>
         <ul id="pokemonList" class="pokemon-list" aria-label="Paldea Pokemon"></ul>
         <p id="emptyState" class="empty-state" hidden>No Pokemon match that view.</p>
       </main>
     </div>
+
+    <dialog id="resetDialog" class="reset-dialog" aria-labelledby="resetDialogTitle">
+      <form method="dialog" class="reset-dialog-card">
+        <h2 id="resetDialogTitle">Reset <span id="resetTrainerName">this trainer</span>'s Pokedex?</h2>
+        <p>This will mark every Pokemon as missing for this trainer. The other trainer's Pokedex will not be changed.</p>
+        <div class="dialog-actions">
+          <button id="cancelReset" class="dialog-button secondary-dialog-button" type="button">Cancel</button>
+          <button id="confirmReset" class="dialog-button danger-dialog-button" type="button">Reset</button>
+        </div>
+      </form>
+    </dialog>
 
     <template id="pokemonCardTemplate">
       <li class="pokemon-card">

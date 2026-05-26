@@ -1,4 +1,4 @@
-const CACHE_NAME = "scarlet-violet-pokedex-v3";
+const CACHE_NAME = "scarlet-violet-pokedex-v6";
 const APP_FILES = [
   "./",
   "./index.html",

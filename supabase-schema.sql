@@ -1,8 +1,12 @@
 create table if not exists public.pokedex_profiles (
   trainer_id text primary key,
   caught_ids integer[] not null default '{}',
+  milestones jsonb not null default '{}',
   updated_at timestamp with time zone not null default now()
 );
+
+alter table public.pokedex_profiles
+  add column if not exists milestones jsonb not null default '{}';
 
 alter table public.pokedex_profiles enable row level security;
 
